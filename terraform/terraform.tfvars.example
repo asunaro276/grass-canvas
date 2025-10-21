@@ -1,0 +1,39 @@
+# AWS Configuration
+aws_region = "ap-northeast-1"
+
+# GitHub Configuration
+github_username = "your-github-username"
+github_token    = "" # Optional: GitHub Personal Access Token
+
+# LINE Configuration
+line_channel_access_token = "your-line-channel-access-token"
+line_user_id              = "your-line-user-id"
+
+# Lambda Configuration
+lambda_memory_size = 512
+lambda_timeout     = 30
+
+# Schedule Configuration (UTC)
+# Default: 9:00, 12:00, 18:00, 21:00 JST
+schedule_times = [
+  {
+    name   = "morning"
+    hour   = "0"   # 9:00 JST
+    minute = "0"
+  },
+  {
+    name   = "noon"
+    hour   = "3"   # 12:00 JST
+    minute = "0"
+  },
+  {
+    name   = "evening"
+    hour   = "9"   # 18:00 JST
+    minute = "0"
+  },
+  {
+    name   = "night"
+    hour   = "12"  # 21:00 JST
+    minute = "0"
+  }
+]

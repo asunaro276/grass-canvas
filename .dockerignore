@@ -1,0 +1,14 @@
+node_modules
+cdk.out
+.env
+.git
+*.md
+src
+lib
+bin
+test
+.vscode
+.idea
+*.swp
+*.swo
+*~

@@ -1,0 +1,20 @@
+{
+  "FunctionName": "grass-canvas-notifier",
+  "Role": "{{ must_env `LAMBDA_ROLE_ARN` }}",
+  "PackageType": "Image",
+  "Timeout": 30,
+  "MemorySize": 512,
+  "Environment": {
+    "Variables": {
+      "GITHUB_USERNAME": "{{ env `GITHUB_USERNAME` `` }}",
+      "GITHUB_TOKEN": "{{ env `GITHUB_TOKEN` `` }}",
+      "LINE_CHANNEL_ACCESS_TOKEN": "{{ env `LINE_CHANNEL_ACCESS_TOKEN` `` }}",
+      "LINE_USER_ID": "{{ env `LINE_USER_ID` `` }}",
+      "S3_BUCKET_NAME": "{{ env `S3_BUCKET_NAME` `` }}"
+    }
+  },
+  "Tags": {
+    "Project": "grass-canvas",
+    "ManagedBy": "lambroll"
+  }
+}
