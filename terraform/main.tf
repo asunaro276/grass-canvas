@@ -1,5 +1,11 @@
 terraform {
   required_version = ">= 1.0"
+  
+  backend "s3" {
+    bucket = "tfstate-nakano"
+    key = "grass-canvas.tfstate"
+    region = "ap-northeast-1"
+  }
 
   required_providers {
     aws = {

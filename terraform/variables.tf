@@ -9,25 +9,6 @@ variable "github_username" {
   type        = string
 }
 
-variable "github_token" {
-  description = "GitHub personal access token"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "line_channel_access_token" {
-  description = "LINE Messaging API channel access token"
-  type        = string
-  sensitive   = true
-}
-
-variable "line_user_id" {
-  description = "LINE user ID to send notifications"
-  type        = string
-  sensitive   = true
-}
-
 variable "lambda_memory_size" {
   description = "Lambda function memory size (MB)"
   type        = number
