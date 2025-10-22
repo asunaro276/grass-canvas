@@ -34,7 +34,8 @@ deploy-lambda: ## Deploy Lambda function using lambroll
 	@export LAMBDA_ROLE_ARN=$$(cd terraform && terraform output -raw lambda_role_arn 2>/dev/null) && \
 	export S3_BUCKET_NAME=$$(cd terraform && terraform output -raw s3_bucket_name 2>/dev/null) && \
 	export GITHUB_USERNAME=$(GITHUB_USERNAME) && \
-	$(HOME)/.local/bin/lambroll deploy --image-uri $(ECR_REPOSITORY_URL):$(IMAGE_TAG)
+	export IMAGE_URI=$(ECR_REPOSITORY_URL):$(IMAGE_TAG) && \
+	cd .lambroll && $(HOME)/.local/bin/lambroll deploy
 	@echo "Lambda deployment completed!"
 
 codebuild-start: ## Trigger CodeBuild to build and push Docker image
