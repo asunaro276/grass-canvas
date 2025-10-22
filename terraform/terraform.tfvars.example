@@ -3,15 +3,15 @@ aws_region = "ap-northeast-1"
 
 # GitHub Configuration
 github_username = "your-github-username"
-github_token    = "" # Optional: GitHub Personal Access Token
-
-# LINE Configuration
-line_channel_access_token = "your-line-channel-access-token"
-line_user_id              = "your-line-user-id"
 
 # Lambda Configuration
 lambda_memory_size = 512
 lambda_timeout     = 30
+
+# SSM Parameter Store paths (optional - uses defaults if not specified)
+# ssm_github_token_path                = "github-token"
+# ssm_line_channel_access_token_path   = "/grass-canvas/line-channel-access-token"
+# ssm_line_user_id_path                = "/grass-canvas/line-user-id"
 
 # Schedule Configuration (UTC)
 # Default: 9:00, 12:00, 18:00, 21:00 JST

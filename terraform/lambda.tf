@@ -15,11 +15,11 @@ resource "aws_lambda_function" "grass_canvas" {
 
   environment {
     variables = {
-      GITHUB_USERNAME            = var.github_username
-      GITHUB_TOKEN               = var.github_token
-      LINE_CHANNEL_ACCESS_TOKEN  = var.line_channel_access_token
-      LINE_USER_ID               = var.line_user_id
-      S3_BUCKET_NAME             = aws_s3_bucket.grass_images.id
+      GITHUB_USERNAME                      = var.github_username
+      S3_BUCKET_NAME                       = aws_s3_bucket.grass_images.id
+      SSM_GITHUB_TOKEN_PATH                = var.ssm_github_token_path
+      SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH   = var.ssm_line_channel_access_token_path
+      SSM_LINE_USER_ID_PATH                = var.ssm_line_user_id_path
     }
   }
 

@@ -6,11 +6,11 @@
   "MemorySize": 512,
   "Environment": {
     "Variables": {
-      "GITHUB_USERNAME": "{{ env `GITHUB_USERNAME` `` }}",
-      "GITHUB_TOKEN": "{{ env `GITHUB_TOKEN` `` }}",
-      "LINE_CHANNEL_ACCESS_TOKEN": "{{ env `LINE_CHANNEL_ACCESS_TOKEN` `` }}",
-      "LINE_USER_ID": "{{ env `LINE_USER_ID` `` }}",
-      "S3_BUCKET_NAME": "{{ env `S3_BUCKET_NAME` `` }}"
+      "GITHUB_USERNAME": "{{ must_env `GITHUB_USERNAME` }}",
+      "S3_BUCKET_NAME": "{{ must_env `S3_BUCKET_NAME` }}",
+      "SSM_GITHUB_TOKEN_PATH": "{{ env `SSM_GITHUB_TOKEN_PATH` `github-token` }}",
+      "SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH": "{{ env `SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH` `/grass-canvas/line-channel-access-token` }}",
+      "SSM_LINE_USER_ID_PATH": "{{ env `SSM_LINE_USER_ID_PATH` `/grass-canvas/line-user-id` }}"
     }
   },
   "Tags": {

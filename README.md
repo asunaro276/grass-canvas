@@ -49,24 +49,43 @@ cd grass-canvas
 # 依存関係をインストール
 npm install
 
-# 環境変数を設定
-cp .env.example .env
-vim .env
-
 # Terraform変数を設定
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 vim terraform/terraform.tfvars
+# github_username を設定
 ```
 
-### 3. デプロイ
+### 3. SSM Parameter Store にシークレットを保存
 
 ```bash
-# Terraformでインフラをプロビジョニング
+# SSMパラメータのセットアップ（対話形式）
+make setup-ssm
+
+# または、環境変数を使って実行
+export GITHUB_TOKEN="your-github-token"  # Optional
+export LINE_CHANNEL_ACCESS_TOKEN="your-line-channel-access-token"
+export LINE_USER_ID="your-line-user-id"
+make setup-ssm
+```
+
+### 4. インフラをデプロイ
+
+```bash
+# Terraformでインフラをプロビジョニング（ECR, S3, IAM, EventBridgeなど）
 make tf-init
 make tf-apply
+```
 
-# Lambdaをデプロイ
-make deploy
+### 5. Lambda関数をデプロイ
+
+```bash
+# Dockerイメージをビルド、ECRにプッシュ、Lambdaにデプロイ
+make deploy-all
+
+# または、個別に実行
+make docker-build  # TypeScriptビルド + Dockerイメージビルド
+make docker-push   # ECRにプッシュ
+make deploy-lambda # Lambdaにデプロイ
 ```
 
 詳細は [セットアップガイド](docs/SETUP.md) および [デプロイガイド](docs/DEPLOYMENT.md) を参照してください。
@@ -85,12 +104,23 @@ make deploy
 
 ### 環境変数
 
-| 変数名 | 説明 | 必須 |
-|--------|------|------|
-| `GITHUB_USERNAME` | GitHubユーザー名 | ✅ |
-| `GITHUB_TOKEN` | GitHub Personal Access Token | ❌ |
-| `LINE_CHANNEL_ACCESS_TOKEN` | LINEチャネルアクセストークン | ✅ |
-| `LINE_USER_ID` | LINEユーザーID | ✅ |
+Lambda関数には以下の環境変数が自動で設定されます：
+
+| 変数名 | 説明 | ソース |
+|--------|------|--------|
+| `GITHUB_USERNAME` | GitHubユーザー名 | terraform.tfvars |
+| `S3_BUCKET_NAME` | S3バケット名 | Terraformから自動設定 |
+| `SSM_GITHUB_TOKEN_PATH` | GitHub TokenのSSMパラメータパス | デフォルト値使用 |
+| `SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH` | LINE TokenのSSMパラメータパス | デフォルト値使用 |
+| `SSM_LINE_USER_ID_PATH` | LINE User IDのSSMパラメータパス | デフォルト値使用 |
+
+### シークレット（SSM Parameter Storeに保存）
+
+| シークレット | 説明 | 必須 | SSMパラメータパス |
+|-------------|------|------|-------------------|
+| GitHub Token | GitHub Personal Access Token | ❌ | `github-token` |
+| LINE Channel Access Token | LINEチャネルアクセストークン | ✅ | `/grass-canvas/line-channel-access-token` |
+| LINE User ID | LINEユーザーID | ✅ | `/grass-canvas/line-user-id` |
 
 ## コスト
 
@@ -113,17 +143,35 @@ make deploy
 ## コマンド
 
 ```bash
-# ビルド
+# SSMパラメータのセットアップ
+make setup-ssm
+
+# TypeScriptビルド
 make build
 
-# デプロイ
-make deploy
+# Dockerイメージビルド（TypeScriptビルドも実行）
+make docker-build
+
+# DockerイメージをECRにプッシュ
+make docker-push
+
+# Lambda関数をデプロイ
+make deploy-lambda
+
+# フルデプロイ（ビルド→プッシュ→デプロイ）
+make deploy-all
 
 # Terraformプラン確認
 make tf-plan
 
+# Terraform適用
+make tf-apply
+
 # Terraformリソース削除
 make tf-destroy
+
+# クリーンアップ
+make clean
 
 # ヘルプ
 make help

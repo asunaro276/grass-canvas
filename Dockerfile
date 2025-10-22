@@ -1,13 +1,15 @@
 FROM public.ecr.aws/lambda/nodejs:20
 
+RUN curl -I https://cdn.amazonlinux.com
+
 # Install dependencies for canvas
-RUN yum install -y \
+RUN microdnf install -y \
     cairo-devel \
     pango-devel \
     libjpeg-turbo-devel \
     giflib-devel \
     librsvg2-devel \
-    && yum clean all
+    && microdnf clean all
 
 # Copy package files
 COPY package*.json ${LAMBDA_TASK_ROOT}/

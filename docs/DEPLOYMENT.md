@@ -31,23 +31,7 @@ brew install --cask docker
 
 ## セットアップ
 
-### 1. 環境変数の設定
-
-```bash
-# .env.exampleをコピー
-cp .env.example .env
-
-# .envファイルを編集
-vim .env
-```
-
-必要な環境変数：
-- `GITHUB_USERNAME`: GitHubユーザー名
-- `GITHUB_TOKEN`: GitHub Personal Access Token（オプション）
-- `LINE_CHANNEL_ACCESS_TOKEN`: LINE Messaging APIのチャネルアクセストークン
-- `LINE_USER_ID`: LINEユーザーID
-
-### 2. Terraform変数の設定
+### 1. Terraform変数の設定
 
 ```bash
 # terraform.tfvars.exampleをコピー
@@ -57,11 +41,37 @@ cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 vim terraform/terraform.tfvars
 ```
 
-### 3. 依存関係のインストール
+必要な設定：
+- `github_username`: GitHubユーザー名
+
+### 2. 依存関係のインストール
 
 ```bash
 npm install
 ```
+
+### 3. SSM Parameter Store にシークレットを保存
+
+AWS Systems Manager Parameter Store にシークレット情報を安全に保存します：
+
+```bash
+# 対話形式でSSMパラメータをセットアップ
+make setup-ssm
+```
+
+または、環境変数から値を渡す場合：
+
+```bash
+export GITHUB_TOKEN="your-github-token"  # Optional
+export LINE_CHANNEL_ACCESS_TOKEN="your-line-channel-access-token"
+export LINE_USER_ID="your-line-user-id"
+make setup-ssm
+```
+
+作成されるSSMパラメータ：
+- `github-token`: GitHub Personal Access Token（オプション、パブリックリポジトリのみの場合は不要）
+- `/grass-canvas/line-channel-access-token`: LINE Messaging APIのチャネルアクセストークン（SecureString）
+- `/grass-canvas/line-user-id`: LINEユーザーID
 
 ## デプロイ手順
 
@@ -90,17 +100,16 @@ make tf-apply
 #### Step 2: Lambdaのビルドとデプロイ
 
 ```bash
-# フルデプロイ（ビルド + プッシュ + デプロイ）
-make deploy
+# フルデプロイ（ビルド + ECRプッシュ + Lambda デプロイ）
+make deploy-all
 ```
 
 内部的には以下の処理が実行されます：
 1. TypeScriptのビルド（`npm run build`）
 2. Dockerイメージのビルド
 3. ECRへのログイン
-4. Dockerイメージのタグ付け
-5. ECRへのプッシュ
-6. Lambrollでのデプロイ
+4. DockerイメージをECRにプッシュ
+5. Lambrollを使ってLambda関数を更新
 
 ### 更新デプロイ
 
@@ -108,7 +117,20 @@ make deploy
 
 ```bash
 # Lambdaのみ再デプロイ
-make deploy
+make deploy-all
+```
+
+個別のステップで実行する場合：
+
+```bash
+# TypeScriptとDockerイメージをビルド
+make docker-build
+
+# ECRにプッシュ
+make docker-push
+
+# Lambdaをデプロイ
+make deploy-lambda
 ```
 
 インフラを変更した場合：
@@ -119,7 +141,7 @@ make tf-plan
 make tf-apply
 
 # 必要に応じてLambdaも再デプロイ
-make deploy
+make deploy-all
 ```
 
 ## 個別コマンド
@@ -144,10 +166,22 @@ make docker-build
 make docker-push
 ```
 
-### Lambrollのみでデプロイ
+### Lambdaデプロイ
 
 ```bash
-make lambroll-deploy
+make deploy-lambda
+```
+
+### フルデプロイ
+
+```bash
+make deploy-all
+```
+
+### SSMパラメータのセットアップ
+
+```bash
+make setup-ssm
 ```
 
 ### Terraformコマンド
@@ -239,11 +273,16 @@ lambroll deploy --image-uri <ECR_URL>:latest --debug
 #### 問題: 環境変数が反映されない
 
 ```bash
-# .envファイルを確認
-cat .env
+# SSMパラメータを確認
+aws ssm get-parameter --name github-token --with-decryption
+aws ssm get-parameter --name /grass-canvas/line-channel-access-token --with-decryption
+aws ssm get-parameter --name /grass-canvas/line-user-id
 
 # Terraform outputsを確認
 cd terraform && terraform output
+
+# Lambda関数の環境変数を確認
+aws lambda get-function-configuration --function-name grass-canvas-notifier --query 'Environment.Variables'
 ```
 
 ## CI/CDへの統合
@@ -282,17 +321,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup SSM Parameters (first time only)
+        run: |
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export LINE_CHANNEL_ACCESS_TOKEN="${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}"
+          export LINE_USER_ID="${{ secrets.LINE_USER_ID }}"
+          make setup-ssm
+        if: github.event_name == 'workflow_dispatch'  # 手動実行時のみ
+
       - name: Terraform Apply
         run: make tf-apply
         env:
           TF_VAR_github_username: ${{ secrets.GITHUB_USERNAME }}
-          TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
-          TF_VAR_line_channel_access_token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          TF_VAR_line_user_id: ${{ secrets.LINE_USER_ID }}
 
       - name: Deploy Lambda
-        run: make deploy
+        run: make deploy-all
+        env:
+          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
 ```
+
+注意: SSMパラメータのセットアップは初回のみ実行してください。2回目以降はTerraformとLambdaのデプロイのみで十分です。
 
 ## アンインストール
 
