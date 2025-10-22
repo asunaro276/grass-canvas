@@ -1,6 +1,7 @@
 {
   "name": "grass-canvas",
   "version": "1.0.0",
+  "type": "module",
   "description": "GitHub contribution graph generator with LINE notification",
   "main": "dist/index.js",
   "scripts": {

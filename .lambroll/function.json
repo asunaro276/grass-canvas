@@ -2,6 +2,9 @@
   "FunctionName": "grass-canvas-notifier",
   "Role": "{{ must_env `LAMBDA_ROLE_ARN` }}",
   "PackageType": "Image",
+  "Code": {
+    "ImageUri": "{{ must_env `IMAGE_URI` }}"
+  },
   "Timeout": 30,
   "MemorySize": 512,
   "Environment": {
