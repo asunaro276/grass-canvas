@@ -22,8 +22,6 @@ export class S3Service {
       Key: key,
       Body: imageBuffer,
       ContentType: 'image/png',
-      // パブリックアクセス可能にする（LINE Messaging APIが画像にアクセスできるように）
-      ACL: 'public-read',
     });
 
     try {
