@@ -60,7 +60,7 @@ export class GrassCanvas {
    */
   private drawTitle(ctx: CanvasRenderingContext2D, totalContributions: number) {
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 14px sans-serif';
+    ctx.font = 'bold 14px "Noto Sans CJK JP", sans-serif';
     ctx.fillText(
       `GitHub Contributions: ${totalContributions} total`,
       this.PADDING,
@@ -73,7 +73,7 @@ export class GrassCanvas {
    */
   private drawDayLabels(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = '#767676';
-    ctx.font = '10px sans-serif';
+    ctx.font = '10px "Noto Sans CJK JP", sans-serif';
 
     const labelIndices = [1, 3, 5]; // 月、水、金
     labelIndices.forEach((dayIndex, i) => {
@@ -96,7 +96,7 @@ export class GrassCanvas {
    */
   private drawMonthLabels(ctx: CanvasRenderingContext2D, weeks: any[]) {
     ctx.fillStyle = '#767676';
-    ctx.font = '10px sans-serif';
+    ctx.font = '10px "Noto Sans CJK JP", sans-serif';
 
     let currentMonth = -1;
     weeks.forEach((week, weekIndex) => {
@@ -106,7 +106,8 @@ export class GrassCanvas {
       const date = new Date(firstDay.date);
       const month = date.getMonth();
 
-      if (month !== currentMonth && weekIndex > 0) {
+      // 月が変わったとき、または最初の週のとき
+      if (month !== currentMonth) {
         currentMonth = month;
         const x =
           this.PADDING +

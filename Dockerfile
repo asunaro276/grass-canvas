@@ -1,12 +1,13 @@
 FROM public.ecr.aws/lambda/nodejs:20
 
-# Install dependencies for canvas
+# Install dependencies for canvas and Japanese fonts
 RUN microdnf install -y \
     cairo-devel \
     pango-devel \
     libjpeg-turbo-devel \
     giflib-devel \
     librsvg2-devel \
+    google-noto-sans-cjk-fonts \
     && microdnf clean all
 
 # Copy package files
