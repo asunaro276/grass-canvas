@@ -1,7 +1,5 @@
 FROM public.ecr.aws/lambda/nodejs:20
 
-RUN curl -I https://cdn.amazonlinux.com
-
 # Install dependencies for canvas
 RUN microdnf install -y \
     cairo-devel \

@@ -11,7 +11,7 @@
     "Variables": {
       "GITHUB_USERNAME": "{{ must_env `GITHUB_USERNAME` }}",
       "S3_BUCKET_NAME": "{{ must_env `S3_BUCKET_NAME` }}",
-      "SSM_GITHUB_TOKEN_PATH": "{{ env `SSM_GITHUB_TOKEN_PATH` `github-token` }}",
+      "SSM_GITHUB_TOKEN_PATH": "{{ env `SSM_GITHUB_TOKEN_PATH` `/grass-canvas/github-token` }}",
       "SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH": "{{ env `SSM_LINE_CHANNEL_ACCESS_TOKEN_PATH` `/grass-canvas/line-channel-access-token` }}",
       "SSM_LINE_USER_ID_PATH": "{{ env `SSM_LINE_USER_ID_PATH` `/grass-canvas/line-user-id` }}"
     }

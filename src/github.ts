@@ -59,6 +59,9 @@ export class GitHubService {
       };
     } catch (error) {
       console.error('Failed to fetch GitHub contributions:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch GitHub contributions: ${error.message}`);
+      }
       throw new Error('Failed to fetch GitHub contributions');
     }
   }
