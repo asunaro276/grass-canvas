@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { subDays, format } from 'date-fns';
-import { ContributionData, ContributionDay, ContributionWeek } from './types';
+import { ContributionData, ContributionDay, ContributionWeek } from './types.js';
 
 export class GitHubService {
   private octokit: Octokit;

@@ -1,9 +1,9 @@
 import { Handler } from 'aws-lambda';
-import { GitHubService } from './github';
-import { GrassCanvas } from './canvas';
-import { S3Service } from './s3';
-import { LineService } from './line';
-import { SSMService } from './ssm';
+import { GitHubService } from './github.js';
+import { GrassCanvas } from './canvas.js';
+import { S3Service } from './s3.js';
+import { LineService } from './line.js';
+import { SSMService } from './ssm.js';
 import { format } from 'date-fns';
 
 export const handler: Handler = async (event, context) => {

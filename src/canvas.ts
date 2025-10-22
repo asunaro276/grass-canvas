@@ -1,5 +1,5 @@
 import { createCanvas, Canvas, CanvasRenderingContext2D } from 'canvas';
-import { ContributionData } from './types';
+import { ContributionData } from './types.js';
 
 export class GrassCanvas {
   private readonly CELL_SIZE = 12;
