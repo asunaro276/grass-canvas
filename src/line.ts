@@ -15,24 +15,18 @@ export class LineService {
   /**
    * 画像メッセージを送信
    */
-  async sendImageMessage(imageUrl: string, message: string): Promise<void> {
+  async sendImageMessage(imageUrl: string): Promise<void> {
     try {
-      await this.client.pushMessage(this.userId, [
-        {
-          type: 'text',
-          text: message,
-        },
-        {
-          type: 'image',
-          originalContentUrl: imageUrl,
-          previewImageUrl: imageUrl,
-        },
-      ]);
+      await this.client.pushMessage(this.userId, {
+        type: 'image',
+        originalContentUrl: imageUrl,
+        previewImageUrl: imageUrl,
+      });
 
-      console.log('LINE message sent successfully');
+      console.log('LINE image message sent successfully');
     } catch (error) {
-      console.error('Failed to send LINE message:', error);
-      throw new Error('Failed to send LINE message');
+      console.error('Failed to send LINE image message:', error);
+      throw new Error('Failed to send LINE image message');
     }
   }
 

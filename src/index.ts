@@ -90,15 +90,12 @@ export const handler: Handler = async (event, context) => {
     // 4. LINEに通知
     const lineService = new LineService(lineChannelAccessToken, lineUserId);
 
-    // 1枚目のメッセージ（直近の草）
-    const todayStatus = todayContributions > 0 ? '✅' : '❌';
-    const message1 = `🌱 Recent GitHub Contributions\n\nToday's Contributions: ${todayContributions} ${todayStatus}`;
-    await lineService.sendImageMessage(recentImageUrl, message1);
+    // 1枚目の画像（直近の草）
+    await lineService.sendImageMessage(recentImageUrl);
     console.log('Sent recent contributions image');
 
-    // 2枚目のメッセージ（年間の草）
-    const message2 = `📊 Yearly GitHub Contributions\n\nTotal Contributions: ${contributionData.totalContributions}`;
-    await lineService.sendImageMessage(yearlyImageUrl, message2);
+    // 2枚目の画像（年間の草）
+    await lineService.sendImageMessage(yearlyImageUrl);
     console.log('Sent yearly contributions image');
 
 
