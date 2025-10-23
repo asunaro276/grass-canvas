@@ -48,5 +48,8 @@ jobs:
       - name: Initialize Terraform
         run: make tf-init
 
+      - name: Apply Terraform changes
+        run: cd terraform && terraform apply -auto-approve
+
       - name: Deploy
         run: make deploy-all-codebuild
