@@ -1,5 +1,5 @@
 import { createCanvas, Canvas, CanvasRenderingContext2D } from 'canvas';
-import { ContributionData } from './types.js';
+import { ContributionData, ContributionWeek } from './types.js';
 
 export class GrassCanvas {
   private readonly CELL_SIZE = 12;
@@ -20,9 +20,9 @@ export class GrassCanvas {
   private readonly WEEKDAY_LABELS = ['月', '水', '金'];
 
   /**
-   * コントリビューションデータから草画像を生成
+   * 年間のコントリビューションデータから草画像を生成
    */
-  generateImage(data: ContributionData): Buffer {
+  generateYearlyImage(data: ContributionData): Buffer {
     const weeks = data.weeks;
     const width =
       this.PADDING * 2 +
@@ -41,24 +41,58 @@ export class GrassCanvas {
     ctx.fillRect(0, 0, width, height);
 
     // タイトルを描画
-    this.drawTitle(ctx, data.totalContributions);
+    this.drawYearlyTitle(ctx, data.totalContributions);
 
     // 曜日ラベルを描画
-    this.drawDayLabels(ctx);
+    this.drawDayLabels(ctx, this.PADDING, this.PADDING + this.MONTH_LABEL_HEIGHT);
 
     // 月ラベルを描画
-    this.drawMonthLabels(ctx, weeks);
+    this.drawMonthLabels(ctx, weeks, this.PADDING + this.DAY_LABEL_WIDTH, this.PADDING);
 
     // 草（コントリビューション）を描画
-    this.drawContributions(ctx, weeks);
+    this.drawContributions(ctx, weeks, this.PADDING + this.DAY_LABEL_WIDTH, this.PADDING + this.MONTH_LABEL_HEIGHT);
 
     return canvas.toBuffer('image/png');
   }
 
   /**
-   * タイトルを描画
+   * 直近2ヶ月のコントリビューションデータから画像を生成
    */
-  private drawTitle(ctx: CanvasRenderingContext2D, totalContributions: number) {
+  generateRecentImage(data: ContributionData, todayContributions: number): Buffer {
+    const recentWeeks = data.weeks.slice(-9); // 過去9週間分を直近とする
+
+    const width = 250;
+    const height = 220;
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // 背景を白に
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // タイトルを描画
+    this.drawRecentTitle(ctx, todayContributions);
+
+    const graphXOffset = this.PADDING;
+    const graphYOffset = 80;
+
+    // 曜日ラベルを描画
+    this.drawDayLabels(ctx, graphXOffset, graphYOffset + this.MONTH_LABEL_HEIGHT);
+
+    // 月ラベルを描画
+    this.drawMonthLabels(ctx, recentWeeks, graphXOffset + this.DAY_LABEL_WIDTH, graphYOffset);
+
+    // 草（コントリビューション）を描画
+    this.drawContributions(ctx, recentWeeks, graphXOffset + this.DAY_LABEL_WIDTH, graphYOffset + this.MONTH_LABEL_HEIGHT);
+
+    return canvas.toBuffer('image/png');
+  }
+
+  /**
+   * 年間グラフのタイトルを描画
+   */
+  private drawYearlyTitle(ctx: CanvasRenderingContext2D, totalContributions: number) {
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 14px "Noto Sans CJK JP", sans-serif';
     ctx.fillText(
@@ -69,24 +103,31 @@ export class GrassCanvas {
   }
 
   /**
+   * 直近グラフのタイトルを描画
+   */
+  private drawRecentTitle(ctx: CanvasRenderingContext2D, todayContributions: number) {
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 16px "Noto Sans CJK JP", sans-serif';
+    ctx.fillText('Recent Contributions', this.PADDING, this.PADDING + 10);
+
+    const todayStatus = todayContributions > 0 ? '✅' : '❌';
+    ctx.font = '14px "Noto Sans CJK JP", sans-serif';
+    ctx.fillText(`Today's Contributions: ${todayContributions} ${todayStatus}`, this.PADDING, this.PADDING + 40);
+  }
+
+  /**
    * 曜日ラベルを描画（月、水、金のみ）
    */
-  private drawDayLabels(ctx: CanvasRenderingContext2D) {
+  private drawDayLabels(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.fillStyle = '#767676';
     ctx.font = '10px "Noto Sans CJK JP", sans-serif';
 
     const labelIndices = [1, 3, 5]; // 月、水、金
     labelIndices.forEach((dayIndex, i) => {
-      const y =
-        this.PADDING +
-        this.MONTH_LABEL_HEIGHT +
-        dayIndex * (this.CELL_SIZE + this.CELL_SPACING) +
-        this.CELL_SIZE / 2 +
-        4;
       ctx.fillText(
         this.WEEKDAY_LABELS[i],
-        this.PADDING,
-        y
+        x,
+        y + dayIndex * (this.CELL_SIZE + this.CELL_SPACING) + this.CELL_SIZE / 2 + 4
       );
     });
   }
@@ -94,7 +135,7 @@ export class GrassCanvas {
   /**
    * 月ラベルを描画
    */
-  private drawMonthLabels(ctx: CanvasRenderingContext2D, weeks: any[]) {
+  private drawMonthLabels(ctx: CanvasRenderingContext2D, weeks: ContributionWeek[], x: number, y: number) {
     ctx.fillStyle = '#767676';
     ctx.font = '10px "Noto Sans CJK JP", sans-serif';
 
@@ -106,15 +147,10 @@ export class GrassCanvas {
       const date = new Date(firstDay.date);
       const month = date.getMonth();
 
-      // 月が変わったとき、または最初の週のとき
+      // 月が変わったとき
       if (month !== currentMonth) {
         currentMonth = month;
-        const x =
-          this.PADDING +
-          this.DAY_LABEL_WIDTH +
-          weekIndex * (this.CELL_SIZE + this.CELL_SPACING);
-        const y = this.PADDING + this.MONTH_LABEL_HEIGHT - 5;
-        ctx.fillText(`${month + 1}月`, x, y);
+        ctx.fillText(`${month + 1}月`, x + weekIndex * (this.CELL_SIZE + this.CELL_SPACING), y + this.MONTH_LABEL_HEIGHT - 10);
       }
     });
   }
@@ -122,26 +158,18 @@ export class GrassCanvas {
   /**
    * コントリビューション（草）を描画
    */
-  private drawContributions(ctx: CanvasRenderingContext2D, weeks: any[]) {
+  private drawContributions(ctx: CanvasRenderingContext2D, weeks: ContributionWeek[], x: number, y: number) {
     weeks.forEach((week, weekIndex) => {
       week.days.forEach((day: any, dayIndex: number) => {
-        const x =
-          this.PADDING +
-          this.DAY_LABEL_WIDTH +
-          weekIndex * (this.CELL_SIZE + this.CELL_SPACING);
-        const y =
-          this.PADDING +
-          this.MONTH_LABEL_HEIGHT +
-          dayIndex * (this.CELL_SIZE + this.CELL_SPACING);
+        const cellX = x + weekIndex * (this.CELL_SIZE + this.CELL_SPACING);
+        const cellY = y + dayIndex * (this.CELL_SIZE + this.CELL_SPACING);
 
-        // セルを描画
         ctx.fillStyle = this.COLORS[day.level as keyof typeof this.COLORS];
-        ctx.fillRect(x, y, this.CELL_SIZE, this.CELL_SIZE);
+        ctx.fillRect(cellX, cellY, this.CELL_SIZE, this.CELL_SIZE);
 
-        // 枠線を描画
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, this.CELL_SIZE, this.CELL_SIZE);
+        ctx.strokeRect(cellX, cellY, this.CELL_SIZE, this.CELL_SIZE);
       });
     });
   }
