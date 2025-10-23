@@ -72,8 +72,20 @@ export const handler: Handler = async (event, context) => {
 
     // 4. LINEに通知
     const lineService = new LineService(lineChannelAccessToken, lineUserId);
-    const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-    const message = `🌱 GitHub草レポート\n\n総コントリビューション: ${contributionData.totalContributions}\n更新時刻: ${currentTime}`;
+
+    // 本日のコントリビュート数を取得
+    const today = format(new Date(), 'yyyy-MM-dd');
+    let todayContributions = 0;
+    for (const week of contributionData.weeks) {
+      const todayData = week.days.find(day => day.date === today);
+      if (todayData) {
+        todayContributions = todayData.count;
+        break;
+      }
+    }
+
+    const todayStatus = todayContributions > 0 ? '✅' : '❌';
+    const message = `🌱 GitHub草レポート\n\n総コントリビューション: ${contributionData.totalContributions}\n本日のコントリビュート: ${todayContributions}回 ${todayStatus}`;
 
     await lineService.sendImageMessage(imageUrl, message);
     console.log('LINE notification sent');
