@@ -60,20 +60,7 @@ export const handler: Handler = async (event, context) => {
     const contributionData = await githubService.getContributions();
     console.log(`Total contributions: ${contributionData.totalContributions}`);
 
-    // 2. Canvasで草画像を生成
-    const grassCanvas = new GrassCanvas();
-    const imageBuffer = grassCanvas.generateImage(contributionData);
-    console.log('Grass image generated');
-
-    // 3. S3に画像をアップロード
-    const s3Service = new S3Service(s3BucketName);
-    const imageUrl = await s3Service.uploadImage(imageBuffer, githubUsername);
-    console.log(`Image uploaded to: ${imageUrl}`);
-
-    // 4. LINEに通知
-    const lineService = new LineService(lineChannelAccessToken, lineUserId);
-
-    // 本日のコントリビュート数を取得
+    // 本日のコントリビューート数を取得
     const today = format(new Date(), 'yyyy-MM-dd');
     let todayContributions = 0;
     for (const week of contributionData.weeks) {
@@ -84,18 +71,41 @@ export const handler: Handler = async (event, context) => {
       }
     }
 
-    const todayStatus = todayContributions > 0 ? '✅' : '❌';
-    const message = `🌱 GitHub草レポート\n\n総コントリビューション: ${contributionData.totalContributions}\n本日のコントリビュート: ${todayContributions}回 ${todayStatus}`;
+    // 2. Canvasで画像を生成
+    const grassCanvas = new GrassCanvas();
+    const recentImageBuffer = grassCanvas.generateRecentImage(contributionData, todayContributions);
+    console.log('Recent contributions image generated');
+    const yearlyImageBuffer = grassCanvas.generateYearlyImage(contributionData);
+    console.log('Yearly contributions image generated');
 
-    await lineService.sendImageMessage(imageUrl, message);
-    console.log('LINE notification sent');
+
+    // 3. S3に画像をアップロード
+    const s3Service = new S3Service(s3BucketName);
+    const recentImageUrl = await s3Service.uploadImage(recentImageBuffer, `${githubUsername}-recent`);
+    console.log(`Recent image uploaded to: ${recentImageUrl}`);
+    const yearlyImageUrl = await s3Service.uploadImage(yearlyImageBuffer, `${githubUsername}-yearly`);
+    console.log(`Yearly image uploaded to: ${yearlyImageUrl}`);
+
+
+    // 4. LINEに通知
+    const lineService = new LineService(lineChannelAccessToken, lineUserId);
+
+    // 1枚目の画像（直近の草）
+    await lineService.sendImageMessage(recentImageUrl);
+    console.log('Sent recent contributions image');
+
+    // 2枚目の画像（年間の草）
+    await lineService.sendImageMessage(yearlyImageUrl);
+    console.log('Sent yearly contributions image');
+
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Successfully sent GitHub grass notification',
         totalContributions: contributionData.totalContributions,
-        imageUrl,
+        recentImageUrl,
+        yearlyImageUrl,
       }),
     };
   } catch (error) {
