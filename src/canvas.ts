@@ -112,7 +112,7 @@ export class GrassCanvas {
 
     const todayStatus = todayContributions > 0 ? '✅' : '❌';
     ctx.font = '14px "Noto Sans CJK JP", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
-    ctx.fillText(`Today's Contributions: ${todayContributions} ${todayStatus}`, this.PADDING, this.PADDING + 40);
+    ctx.fillText(`Today's Contributions: ${todayContributions}${todayStatus}`, this.PADDING, this.PADDING + 40);
   }
 
   /**
