@@ -13,27 +13,22 @@ lambda_timeout     = 30
 # ssm_line_channel_access_token_path   = "/grass-canvas/line-channel-access-token"
 # ssm_line_user_id_path                = "/grass-canvas/line-user-id"
 
-# Schedule Configuration (UTC)
+# Schedule Configuration (JST)
 # Default: 9:00, 12:00, 18:00, 21:00 JST
 schedule_times = [
   {
     name   = "morning"
-    hour   = "0"   # 9:00 JST
-    minute = "0"
-  },
-  {
-    name   = "noon"
-    hour   = "3"   # 12:00 JST
+    hour   = "9"
     minute = "0"
   },
   {
     name   = "evening"
-    hour   = "9"   # 18:00 JST
+    hour   = "18"
     minute = "0"
   },
   {
     name   = "night"
-    hour   = "12"  # 21:00 JST
+    hour   = "21"
     minute = "0"
   }
 ]

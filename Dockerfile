@@ -8,6 +8,7 @@ RUN microdnf install -y \
     giflib-devel \
     librsvg2-devel \
     google-noto-sans-cjk-fonts \
+    google-noto-color-emoji-fonts \
     && microdnf clean all
 
 # Copy package files

@@ -22,7 +22,7 @@ variable "lambda_timeout" {
 }
 
 variable "schedule_times" {
-  description = "Cron schedule times (UTC)"
+  description = "Cron schedule times (JST)"
   type = list(object({
     name   = string
     hour   = string
@@ -31,22 +31,22 @@ variable "schedule_times" {
   default = [
     {
       name   = "morning"
-      hour   = "0"
-      minute = "0"
-    },
-    {
-      name   = "noon"
-      hour   = "3"
-      minute = "0"
-    },
-    {
-      name   = "evening"
       hour   = "9"
       minute = "0"
     },
     {
-      name   = "night"
+      name   = "noon"
       hour   = "12"
+      minute = "0"
+    },
+    {
+      name   = "evening"
+      hour   = "18"
+      minute = "0"
+    },
+    {
+      name   = "night"
+      hour   = "21"
       minute = "0"
     }
   ]
