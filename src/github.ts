@@ -16,9 +16,30 @@ export class GitHubService {
   /**
    * GitHubのコントリビューションデータを取得
    * GraphQL APIを使用して過去1年分のデータを取得
+   * tokenが提供されている場合はprivateリポジトリのコントリビューションも含む
    */
   async getContributions(): Promise<ContributionData> {
-    const query = `
+    // tokenが提供されている場合はviewerクエリを使用してprivateコントリビューションも取得
+    const useViewer = this.octokit.auth !== undefined;
+
+    const query = useViewer ? `
+      query {
+        viewer {
+          contributionsCollection {
+            contributionCalendar {
+              totalContributions
+              weeks {
+                contributionDays {
+                  contributionCount
+                  date
+                  contributionLevel
+                }
+              }
+            }
+          }
+        }
+      }
+    ` : `
       query($username: String!) {
         user(login: $username) {
           contributionsCollection {
@@ -38,11 +59,13 @@ export class GitHubService {
     `;
 
     try {
-      const response: any = await this.octokit.graphql(query, {
-        username: this.username,
-      });
+      const response: any = useViewer
+        ? await this.octokit.graphql(query)
+        : await this.octokit.graphql(query, { username: this.username });
 
-      const calendar = response.user.contributionsCollection.contributionCalendar;
+      const calendar = useViewer
+        ? response.viewer.contributionsCollection.contributionCalendar
+        : response.user.contributionsCollection.contributionCalendar;
 
       // データを整形
       const weeks: ContributionWeek[] = calendar.weeks.map((week: any) => ({
