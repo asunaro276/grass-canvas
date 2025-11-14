@@ -9,6 +9,18 @@ variable "github_username" {
   type        = string
 }
 
+variable "github_repository_owner" {
+  description = "GitHub repository owner"
+  type        = string
+  default     = "asunaro276"
+}
+
+variable "github_repository_name" {
+  description = "GitHub repository name"
+  type        = string
+  default     = "grass-canvas"
+}
+
 variable "lambda_memory_size" {
   description = "Lambda function memory size (MB)"
   type        = number
